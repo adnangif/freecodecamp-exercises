@@ -3,7 +3,9 @@ const mongoose = require("mongoose");
 const router = express.Router();
 
 const { users, exercise } = require("./models/Users.js");
-mongoose.connect("mongodb://127.0.0.1:27017/fcc", {
+const uri =
+  "mongodb+srv://admin:anypasswilldo@clusterinsta.eqeae.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -57,6 +59,7 @@ router.post("/users/:_id/exercises", async (req, res) => {
     users.updateOne({ _id: user_id }, { $inc: { count: 1 } });
     res.send({
       _id: user_id,
+      username: user.username,
       description,
       duration,
       date,
@@ -66,8 +69,13 @@ router.post("/users/:_id/exercises", async (req, res) => {
 
 router.get("/users/:_id/logs", async (req, res) => {
   const id = req.params._id;
-  const from = new Date(req.query.from).getTime();
-  const to = new Date(req.query.to).getTime();
+  const queries = Object.keys(req.query);
+  queries.reverse();
+  console.log(queries);
+
+  let [to, from, limit] = queries;
+  from = new Date(from).getTime();
+  to = new Date(to).getTime();
 
   const user = await users.findOne({ _id: req.params._id });
   const log = await user.log;
@@ -83,13 +91,13 @@ router.get("/users/:_id/logs", async (req, res) => {
   }
 
   if (from) {
-    let limit = req.query.limit || filteredLog.length;
+    limit = limit || filteredLog.length;
     limit = Number.parseInt(limit);
     res.send({
       _id: id,
       username: user.username,
-      from: new Date(req.query.from).toDateString(),
-      to: new Date(req.query.to).toDateString(),
+      from: new Date(from).toDateString(),
+      to: new Date(to).toDateString(),
       count: limit,
       log: filteredLog.slice(0, limit),
     });
