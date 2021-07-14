@@ -69,11 +69,12 @@ router.post("/users/:_id/exercises", async (req, res) => {
 
 router.get("/users/:_id/logs", async (req, res) => {
   const id = req.params._id;
-  const queries = Object.keys(req.query);
-  queries.reverse();
-  console.log(queries);
+  let from = req.query.from;
+  let to = req.query.to;
+  let limit = req.query.limit;
 
-  let [to, from, limit] = queries;
+  console.log(from, to, limit);
+
   from = new Date(from).getTime();
   to = new Date(to).getTime();
 
@@ -102,11 +103,13 @@ router.get("/users/:_id/logs", async (req, res) => {
       log: filteredLog.slice(0, limit),
     });
   } else {
+    limit = limit || filteredLog.length;
+    limit = Number.parseInt(limit);
     res.send({
       _id: id,
       username: user.username,
-      count: filteredLog.length,
-      log: filteredLog,
+      count: limit,
+      log: filteredLog.slice(0, limit),
     });
   }
 });
