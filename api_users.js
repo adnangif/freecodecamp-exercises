@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const router = express.Router();
 
 const { users, exercise } = require("./models/Users.js");
-
 mongoose.connect("mongodb://127.0.0.1:27017/fcc", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -74,26 +73,34 @@ router.get("/users/:_id/logs", async (req, res) => {
   const log = await user.log;
   let filteredLog = log;
 
-  if (from != "Invalid Date") {
+  if (from) {
     filteredLog = log.filter((item) => {
       let nowDate = new Date(item.date).getTime();
-
       const condition1 = from - nowDate <= 0;
       const condition2 = to - nowDate > 0;
       return condition1 && condition2;
     });
   }
 
-  let limit = req.query.limit || filteredLog.length;
-  limit = Number.parseInt(limit);
-  res.send({
-    _id: id,
-    username: user.username,
-    from: new Date(req.query.from).toDateString(),
-    to: new Date(req.query.to).toDateString(),
-    count: limit,
-    log: filteredLog.slice(0, limit),
-  });
+  if (from) {
+    let limit = req.query.limit || filteredLog.length;
+    limit = Number.parseInt(limit);
+    res.send({
+      _id: id,
+      username: user.username,
+      from: new Date(req.query.from).toDateString(),
+      to: new Date(req.query.to).toDateString(),
+      count: limit,
+      log: filteredLog.slice(0, limit),
+    });
+  } else {
+    res.send({
+      _id: id,
+      username: user.username,
+      count: filteredLog.length,
+      log: filteredLog,
+    });
+  }
 });
 
 module.exports = router;
