@@ -49,7 +49,7 @@ router.post("/users/:_id/exercises", async (req, res) => {
   const description = req.body.description;
   const duration = Number.parseInt(req.body.duration);
 
-  let date = req.body.date.trim() != "" ? req.body.date : Date.now();
+  let date = req.body.date != "" ? req.body.date : Date.now();
   date = new Date(date);
   date = date.toDateString();
 
